@@ -123,7 +123,7 @@ class Period {
                 $overdraft = 0 - $this->getWiggle();
                 $old = array_shift($this->expense);
                 if ($overdraft < $old->getValue()) {
-                    $new_value = $overdraft - $old->getValue();
+                    $new_value = $old->getValue() - $overdraft;
                     $name = $old->getName();
                     $date = $old->getDate();
                     $temp = new ExpenseInstance($name, $overdraft, $date);

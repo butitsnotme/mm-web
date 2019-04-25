@@ -6,6 +6,7 @@ class TargetItem {
     protected $current;
     protected $start;
     protected $end;
+    protected $failed;
     
     public function __construct($name, $value, $current, $start, $end) {
         if (!is_string($name)) {
@@ -33,6 +34,7 @@ class TargetItem {
         $this->current = $current;
         $this->start = $start;
         $this->end = $end;
+        $this->failed = false;
     }
     
     public function getName() {
@@ -59,6 +61,14 @@ class TargetItem {
         return $this->name === $name;
     }
     
+    public function failed() {
+        return $this->failed;
+    }
+    
+    public function fail() {
+        $this->failed = true;
+    }
+    
     public function to_array() {
         return [
             "name" => $this->name,
@@ -70,11 +80,14 @@ class TargetItem {
     }
     
     public function render() {
+        $cl = $this->failed ? " class=\"failed\"" : "";
+        $nt = $this->failed ? "<tr><td colspan=\"6\">This saving target could " .
+                "not be met. Please adjust accordingly.</tr>" : "";
         $sd = $this->start->format(FinanceItem::DATE_FORMAT);
         $ed = $this->end->format(FinanceItem::DATE_FORMAT);
-        $perc = $this->current / $this->value * 100;
+        $perc = sprintf("%0.2d", $this->current / $this->value * 100);
         $rem = "<a href=\"delete.php?type=target&name={$this->name}\">[X]</a>";
-        return "<tr><td>{$this->name}<td><td>$sd<td>$ed<td>\${$this->current} / \${$this->value} ($perc%) <td>$rem</tr>";
+        return "$nt<tr$cl><td>{$this->name}<td><td>$sd<td>$ed<td>\${$this->current} / \${$this->value} ($perc%) <td>$rem</tr>";
     }
     
     public static function renderBlank() {

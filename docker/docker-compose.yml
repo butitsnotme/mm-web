@@ -4,7 +4,6 @@ services:
   mm-web:
     image: mm-web:latest
     ports:
-      - 8080:80
+      - 36080:80
     volumes:
-      - ../local-data:/var/www/localhost/data
-      - ../src:/var/www/localhost/htdocs
+      - ../data:/var/www/localhost/data

@@ -27,6 +27,7 @@ class Future {
     }
     
     public function calculate() {
+        $this->failed = [];
         $periods = $this->generatePeriods();
         $periods = $this->balanceExpenses($periods);
         
@@ -134,6 +135,7 @@ class Future {
 
             if ($totalWiggle < $remaining) {
                 // We have a problem...
+                $target->fail();
                 return false;
             }
 

@@ -31,6 +31,9 @@ class Storage {
 
         $data = json_decode(gzdecode(file_get_contents($fname)), true);
         
+        $display_name = $data["name"];
+        $data = $data["data"];
+        
         $items = [];
         $targets = [];
         
@@ -77,7 +80,7 @@ class Storage {
             }
         }
         
-        return new Data($name, $items, $targets);
+        return new Data($name, $display_name, $items, $targets);
     }
     
     public function save(Data $d) {     
@@ -98,8 +101,16 @@ class Storage {
             array_push($a, $a_i);
         }
         
+        $a = [ "name" => $d->getDisplayName(), "data" => $a];
+        
         $fname = "{$this->dir}/{$d->getName()}";
         file_put_contents($fname, gzencode(json_encode($a), 9));
+    }
+    
+    public function delete($name) {
+        $fname = "{$this->dir}/$name";
+        
+        unlink($fname);
     }
     
     public static function getName() {

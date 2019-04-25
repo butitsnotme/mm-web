@@ -4,17 +4,23 @@ require_once 'Future.php';
 
 class Data {
     private $name;
+    private $display_name;
     private $items;
     private $targets;
     
-    public function __construct($name, $items, $targets) {
+    public function __construct($name, $display_name, $items, $targets) {
         $this->name = $name;
+        $this->display_name = $display_name;
         $this->items = $items;
         $this->targets = $targets;
     }
     
     public function getName() {
         return $this->name;
+    }
+    
+    public function getDisplayName() {
+        return $this->display_name;
     }
     
     public function addItem(FinanceItem $item) {
@@ -41,6 +47,9 @@ class Data {
     
     public function render($parts = null) {
         $lines = [];
+        $f = new Future($this->items, $this->targets);
+
+        $periods = $f->calculate();
         
         array_push($lines, "<table>");
         array_push($lines, "<tr><th>Name<th>Frequency<th>Start Date<th>End Date<th>Amount<th>Action</tr>");
@@ -88,9 +97,6 @@ class Data {
         array_push($lines, "<tr><td colspan=\"6\"><h2>Future Projection</h2></tr>");
         array_push($lines, "<tr><th>Name<th>Amount<th>So far<th>Target<th>Percentage<th>Date</tr>");
         $flag = false;
-        $f = new Future($this->items, $this->targets);
-
-        $periods = $f->calculate();
 
         foreach ($periods as $p) {
             $flag = true;
@@ -107,26 +113,29 @@ class Data {
     
     public function to_array() {
         return array_merge(
-            array_map(
-                    function ($i) { 
-                        $a = $i->to_array();
-                        if ($i instanceof IncomeItem) {
-                            $a["type"] = "income";
-                        }
-                        if ($i instanceof ExpenseItem) {
-                            $a["type"] = "expense";
-                        }
-                        return $a;
-                    }, $this->items),
-            array_map(
-                    function ($t) {
-                        return array_merge($t->to_array(), ["type" => "target"]);
-                     }, $this->targets)
+                array_map(
+                        function ($i) {
+                    $a = $i->to_array();
+                    if ($i instanceof IncomeItem) {
+                        $a["type"] = "income";
+                    }
+                    if ($i instanceof ExpenseItem) {
+                        $a["type"] = "expense";
+                    }
+                    return $a;
+                }, $this->items),
+                array_map(
+                        function ($t) {
+                    return array_merge($t->to_array(), ["type" => "target"]);
+                }, $this->targets)
         );
     }
     
-    public static function new() {
+    public static function new($display_name = null) {
         $name = Storage::getName();
-        return new Data($name, [], []);
+        if (null === $display_name) {
+            $display_name = $name;
+        }
+        return new Data($name, $display_name, [], []);
     }
 }
